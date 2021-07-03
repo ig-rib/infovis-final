@@ -9,9 +9,9 @@ def convertAllNupleMappingsToDict(aM, keyColumn, valueColumns):
     theDict = {}
     if len(aM) > 0:
         for mapping in aM:
-            theDict[mapping[keyColumn]] = []
+            theDict[mapping[keyColumn]] = {}
             for valueColumnName in valueColumns:
-                theDict[mapping[keyColumn]].append(mapping[valueColumnName])
+                theDict[mapping[keyColumn]][valueColumnName] = mapping[valueColumnName]
     return theDict
 
 def convertAllPairMappingsToDict(aM, key, value):
@@ -47,8 +47,8 @@ def get_first_doses_per_vaccine_to_date(db:Session):
     select vacuna, dosesGiven, dosesGiven::numeric / totalvacunas1raDosis.total1 as percentage\
     from totalvacunas1raDosis, dosesPerVaccine;\
     ")
-
-    return convertAllNupleMappingsToDict(res.mappings().all(), 'vacuna', ['dosesGiven', 'percentage'])
+    result = convertAllNupleMappingsToDict(res.mappings().all(), 'vacuna', ['dosesgiven', 'percentage'])
+    return result
 
 
 def get_second_doses_per_vaccine_to_date(db:Session):
@@ -66,7 +66,7 @@ def get_second_doses_per_vaccine_to_date(db:Session):
         from totalvacunas2daDosis, dosesPerVaccine;\
     ")
 
-    return convertAllNupleMappingsToDict(res.mappings().all(), 'vacuna', ['dosesGiven', 'percentage']) 
+    return convertAllNupleMappingsToDict(res.mappings().all(), 'vacuna', ['dosesgiven', 'percentage']) 
 
 def get_total_doses_per_vaccine_to_date(db:Session):
 
@@ -78,11 +78,11 @@ def get_total_doses_per_vaccine_to_date(db:Session):
         from nomivac, totalvacunas\
         group by vacuna\
         )\
-        select vacuna, dosesGiven, dosesGiven::numeric / totalvacunas.total as ratio\
+        select vacuna, dosesGiven, dosesGiven::numeric / totalvacunas.total as percentage\
         from totalvacunas, dosesPerVaccine;\
     ")
 
-    return res.mappings().all()
+    return convertAllNupleMappingsToDict(res.mappings().all(), 'vacuna', ['dosesgiven', 'percentage']) 
 
 def get_doses_per_province(db:Session):
 
@@ -103,7 +103,7 @@ def get_doses_per_province(db:Session):
         where FirstDoseProv.jurisdiccion_aplicacion = SecondDoseProv.jurisdiccion_aplicacion;\
     ")
 
-    return convertAllNupleMappingsToDict(res.mappings().all(), 'jurisdiccion_aplicacion', ['total1Dosis', 'total2Dosis'])
+    return convertAllNupleMappingsToDict(res.mappings().all(), 'jurisdiccion_aplicacion', ['total1dosis', 'total2dosis'])
 
 def get_doses_per_condition(db:Session):
 
@@ -124,7 +124,7 @@ def get_doses_per_condition(db:Session):
         where FirstDoseCond.condicion_aplicacion = SecondDoseCond.condicion_aplicacion;\
         ")
 
-    return convertAllNupleMappingsToDict(res.mappings().all(), 'condicion_aplicacion', ['total1Dosis', 'total2Dosis'])
+    return convertAllNupleMappingsToDict(res.mappings().all(), 'condicion_aplicacion', ['total1dosis', 'total2dosis'])
 
 def get_doses_per_sex(db:Session):
 
@@ -145,7 +145,7 @@ def get_doses_per_sex(db:Session):
             where FirstDoseSex.sexo = SecondDoseSex.sexo;\
         ")
 
-    return convertAllNupleMappingsToDict(res.mappings().all(), 'sexo', ['total1Dosis', 'total2Dosis'])
+    return convertAllNupleMappingsToDict(res.mappings().all(), 'sexo', ['total1dosis', 'total2dosis'])
 
 
 def get_general_dose_stats(db:Session):
