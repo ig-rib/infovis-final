@@ -16,9 +16,13 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/")
+@app.get("/vaccines/")
 def home(db: Session = Depends(get_db)):
     return queries.get_vaccines_per_day(db)
+
+@app.get("/vaccines/general_stats")
+def general_stats(db: Session = Depends(get_db)):
+    return queries.get_general_dose_stats(db)
 
 @app.on_event("startup")
 @repeat_every(seconds = 60 * 60 * 24)

@@ -47,7 +47,7 @@ group by vacuna
 select vacuna, dosesGiven, dosesGiven::numeric / totalvacunas2daDosis.total2 as ratio
 from totalvacunas2daDosis, dosesPerVaccine;
 
--- Vacunas de los últimos 14 días
+-- Vacunas de los últimos 90 días
 
 select to_date(fecha_aplicacion, 'yyyy-MM-dd'), count(*) as totalVacunas
 from nomivac
@@ -73,17 +73,47 @@ where FirstDoseProv.jurisdiccion_aplicacion = SecondDoseProv.jurisdiccion_aplica
 
 -- Dosis según condicion
 
-with FirstDoseProv as (
-    select jurisdiccion_aplicacion, count(*) as total1Dosis
+with FirstDoseCond as (
+    select condicion_aplicacion, count(*) as total1Dosis
     from nomivac
     where orden_dosis=1
-    group by jurisdiccion_aplicacion
-), SecondDoseProv as (
-    select jurisdiccion_aplicacion, count(*) as total2Dosis
+    group by condicion_aplicacion
+), SecondDoseCond as (
+    select condicion_aplicacion, count(*) as total2Dosis
     from nomivac
     where orden_dosis=2
-    group by jurisdiccion_aplicacion
+    group by condicion_aplicacion
 )
-select SecondDoseProv.jurisdiccion_aplicacion, total1Dosis, total2Dosis
-from FirstDoseProv, SecondDoseProv
-where FirstDoseProv.jurisdiccion_aplicacion = SecondDoseProv.jurisdiccion_aplicacion;
+select SecondDoseCond.condicion_aplicacion, total1Dosis, total2Dosis
+from FirstDoseCond, SecondDoseCond
+where FirstDoseCond.condicion_aplicacion = SecondDoseCond.condicion_aplicacion;
+
+-- Dosis según sexo
+
+with FirstDoseSex as (
+    select sexo, count(*) as total1Dosis
+    from nomivac
+    where orden_dosis=1
+    group by sexo
+), SecondDoseSex as (
+    select sexo, count(*) as total2Dosis
+    from nomivac
+    where orden_dosis=2
+    group by sexo
+)
+select SecondDoseSex.sexo, total1Dosis, total2Dosis
+from FirstDoseSex, SecondDoseSex
+where FirstDoseSex.sexo = SecondDoseSex.sexo;
+
+-- General dose stats
+
+select count(*) as totalVacunados
+from nomivac
+where orden_dosis = 1;
+
+select count(*) as totalVacunados
+from nomivac
+where orden_dosis = 2;
+
+select count(*) as totalVacunados
+from nomivac;
