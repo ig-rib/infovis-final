@@ -1,0 +1,1 @@
+psql -c "\copy nomivac from './datos_nomivac_covid19.csv' delimiter ',' csv header" -U postgres -d infovis
