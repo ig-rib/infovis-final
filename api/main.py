@@ -92,5 +92,6 @@ def updateDataBases() -> None:
         #         lote_vacuna) FROM STDIN CSV DELIMITER ',' HEADER"
         # cursor.copy_expert(cmd, f)
         # print("commiting")
+        # conn.execute("insert into updates values(NOW()::timestamp);")
         # conn.commit()
     print("done")
