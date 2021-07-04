@@ -20,6 +20,14 @@ def get_db():
 def home(db: Session = Depends(get_db)):
     return queries.get_vaccines_per_day(db)
 
+@app.get("/vaccines/first_doses")
+def home(db: Session = Depends(get_db)):
+    return queries.get_first_doses_per_day(db)
+
+@app.get("/vaccines/second_doses")
+def home(db: Session = Depends(get_db)):
+    return queries.get_second_doses_per_day(db)
+
 @app.get("/vaccines/companies/first_doses")
 def firstDosesPerCompany(db: Session = Depends(get_db)):
     return queries.get_first_doses_per_vaccine_to_date(db)
@@ -31,6 +39,10 @@ def secondDosesPerCompany(db: Session = Depends(get_db)):
 @app.get("/vaccines/companies/total_doses")
 def totalDosesPerCompany(db: Session = Depends(get_db)):
     return queries.get_total_doses_per_vaccine_to_date(db)
+
+@app.get("/vaccines/companies/total_data")
+def totalDosesPerCompany(db: Session = Depends(get_db)):
+    return queries.get_doses_per_vaccine_to_date(db)
 
 @app.get("/vaccines/provinces/total_doses")
 def totalDosesPerCompany(db: Session = Depends(get_db)):

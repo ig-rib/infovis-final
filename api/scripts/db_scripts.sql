@@ -47,12 +47,51 @@ group by vacuna
 select vacuna, dosesGiven, dosesGiven::numeric / totalvacunas2daDosis.total2 as ratio
 from totalvacunas2daDosis, dosesPerVaccine;
 
+
+-- Toda la info de vacunas por marca
+
+with primeraDosis as (
+    with totalvacunas1raDosis as (
+    select count(*) as total1 from nomivac where orden_dosis = 1
+    ), dosesPerVaccine as (
+    select vacuna, count(*) as dosesGiven
+    from nomivac, totalvacunas1raDosis
+    where orden_dosis = 1
+    group by vacuna
+    )
+    select vacuna, dosesGiven, dosesGiven::numeric / totalvacunas1raDosis.total1 as ratio
+    from totalvacunas1raDosis, dosesPerVaccine
+), segundaDosis as (
+    with totalvacunas2daDosis as (
+        select count(*) as total2 from nomivac where orden_dosis = 2
+    ), dosesPerVaccine as (
+    select vacuna, count(*) as dosesGiven
+    from nomivac, totalvacunas2daDosis
+    where orden_dosis = 2
+    group by vacuna
+    )
+    select vacuna, dosesGiven, dosesGiven::numeric / totalvacunas2daDosis.total2 as ratio
+    from totalvacunas2daDosis, dosesPerVaccine
+)
+select pD.vacuna as vacuna, pD.dosesGiven as firstDose, pD.ratio as firstDoseRatio, sD.dosesGiven as secondDose, sD.ratio as secondDoseRatio, pD.dosesGiven + sD.dosesGiven as total, 
+from primeraDosis pD join segundaDosis sD on pD.vacuna = sD.vacuna; 
+
 -- Vacunas de los últimos 90 días
 
-select to_date(fecha_aplicacion, 'yyyy-MM-dd'), count(*) as totalVacunas
-from nomivac
-where fecha_aplicacion != 'S.I.' and TO_TIMESTAMP(fecha_aplicacion, 'yyyy-MM-dd') >= (NOW()::timestamp - interval '90 days')
-group by fecha_aplicacion;
+with primerasDosis as (
+    select to_date(fecha_aplicacion, 'yyyy-MM-dd') as fecha_appl, count(*) as totalVacunas
+    from nomivac
+    where orden_dosis = 1 and fecha_aplicacion != 'S.I.' and TO_TIMESTAMP(fecha_aplicacion, 'yyyy-MM-dd') >= (NOW()::timestamp - interval '90 days')
+    group by fecha_aplicacion
+),
+segundasDosis as (
+    select to_date(fecha_aplicacion, 'yyyy-MM-dd') as fecha_appl, count(*) as totalVacunas
+    from nomivac
+    where orden_dosis = 2 and fecha_aplicacion != 'S.I.' and TO_TIMESTAMP(fecha_aplicacion, 'yyyy-MM-dd') >= (NOW()::timestamp - interval '90 days')
+    group by fecha_aplicacion
+)
+select pd.fecha_appl as fecha_appl, pd.totalVacunas as primerasDosis, sd.totalVacunas as segundasDosis, pd.totalVacunas + sd.totalVacunas as totalVacunas
+from primerasDosis pd join segundasDosis sd on pd.fecha_appl = sd.fecha_appl;
 
 -- Dosis por provincia
 
