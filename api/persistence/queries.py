@@ -231,3 +231,6 @@ def get_general_dose_stats(db:Session):
     total = first + second
 
     return {"firstDoses": first, "secondDoses": second, "totalRegistered": total}
+
+def get_last_updated_date(db:Session):
+    return db.execute("select * from updates order by updated desc limit 1;").mappings().all()

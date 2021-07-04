@@ -26,10 +26,18 @@ GENERAL_STATS = 'general_stats'
 # Texto Con Stats Generales
 ###
 
-# with urllib.request.urlopen(BASE_URL + COMPANIES_TOTAL_DOSES) as ctdUrl:
-#     generalStats = json.loads(ctdUrl.read())
+with urllib.request.urlopen(BASE_URL + GENERAL_STATS) as ctdUrl:
+    generalStats = json.loads(ctdUrl.read())
 
+gs = []
+for key in generalStats.keys():
+    gs.append({'stat': key, 'value': generalStats[key], 'latitude': 40, 'longitude': 50})
 
+df = pd.DataFrame(gs)
+
+base = alt.Chart(df)\
+    .mark_rect()\
+    .encode(tooltip=['stat:N', 'value:Q'], latitude='latitude:Q', longitude='longitude:Q')
 
 ###
 # Area Plot con Dosis de los últimos 90 días
@@ -45,7 +53,7 @@ areaPlot = alt.Chart(df)\
     .transform_fold(['Primera Dosis', 'Segunda Dosis'],
         as_=['Orden de Dosis', 'Cantidad Aplicada'])\
     .encode(x=alt.X('fecha_appl:T', title='Fecha de Aplicación'), y='Cantidad Aplicada:Q', color='Orden de Dosis:N', tooltip=[alt.Tooltip('fecha_appl:T', title='Fecha de Aplicación'), 'Orden de Dosis:N', 'Cantidad Aplicada:Q', alt.Tooltip('Total:Q', title='Total (Cualquier Dosis)')])\
-    .properties(width=700)
+    .properties(width=800)
 # areaPlot.show()
 
 ###
@@ -60,11 +68,11 @@ df = pd.DataFrame(companiesTotalData).rename(columns={"firstdose": "Primera Dosi
 barChart = alt.Chart(df[['vacuna', 'Primera Dosis','Segunda Dosis']])\
 .transform_fold(['Primera Dosis', 'Segunda Dosis'], as_=['Orden de Dosis', 'Cantidad Aplicada'])\
 .mark_bar().encode(
-    x='vacuna:N',
+    x=alt.X('vacuna:N', title='Vacuna'),
     y='Cantidad Aplicada:Q',
     color='Orden de Dosis:N',
     tooltip=[alt.Tooltip('vacuna:N', title="Vacuna"), alt.Tooltip('Primera Dosis:Q'), alt.Tooltip('Segunda Dosis:Q')]
-).properties(width=700)
+).properties(width=200)
 
 # barChart.show()
 
@@ -82,7 +90,7 @@ bubbleChart = alt.Chart(df)\
     .encode(y=alt.Y('total:Q', title='Total Dosis Aplicadas', scale=alt.Scale(type='log')),
         color=alt.Color('condicion_aplicacion',
             type='nominal',
-            title = 'Total de Dosis Aplicadas',
+            title = 'Condición de Aplicación',
             scale=alt.Scale(scheme='category20c')),
         size=alt.Size('total',
             type='quantitative',
@@ -107,11 +115,11 @@ df['sexo'].replace({'S.I.': 'No especifica', 'F': 'Femenino', 'M': 'Masculino'},
 
 horizontalBarChart = alt.Chart(df).mark_bar()\
     .transform_fold(['Primera Dosis', 'Segunda Dosis'], as_=['Orden de Dosis', 'Cantidad Aplicada'])\
-    .encode(y='sexo:N',
+    .encode(y=alt.Y('sexo:N', title='Sexo'),
         x='Cantidad Aplicada:Q',
         color='Orden de Dosis:N',
         tooltip=[alt.Tooltip('sexo:N', title='Sexo'), 'Primera Dosis', 'Segunda Dosis'])\
-    .properties(width=300, height=200)
+    .properties(width=500, height=300)
 
 # horizontalBarChart.show()
 
@@ -147,11 +155,11 @@ geoShape = alt.Chart(mergedData)\
             alt.Tooltip('total2dosis', title='Segundas Dosis Aplicadas'),
             alt.Tooltip('total', title='Total de Dosis Aplicadas')]
     ).properties(
-        width=500,
+        width=400,
         height=500
     )
 # geoShape.show()
 
-dashboard = alt.vconcat(areaPlot, barChart, (bubbleChart | geoShape), horizontalBarChart)
+dashboard = alt.vconcat(areaPlot, (bubbleChart | geoShape), (barChart | horizontalBarChart))
 
-dashboard.show()
+dashboard.serve()
