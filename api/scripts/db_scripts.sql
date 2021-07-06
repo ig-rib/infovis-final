@@ -1,4 +1,7 @@
+-- creación de tablas
+
 create table nomivac(
+id serial primary key,
 sexo text,
 grupo_etario text,
 jurisdiccion_residencia text,
