@@ -206,7 +206,7 @@ def get_doses_per_sex(db:Session):
             )\
             select SecondDoseSex.sexo, total1Dosis, total2Dosis\
             from FirstDoseSex, SecondDoseSex\
-            where FirstDoseSex.sexo = SecondDoseSex.sexo;\
+            where FirstDoseSex.sexo = SecondDoseSex.sexo and FirstDoseSex.sexo != 'S.I.';\
         ")
 
     return res.mappings().all()

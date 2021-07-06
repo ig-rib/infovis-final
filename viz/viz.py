@@ -26,18 +26,18 @@ GENERAL_STATS = 'general_stats'
 # Texto Con Stats Generales
 ###
 
-with urllib.request.urlopen(BASE_URL + GENERAL_STATS) as ctdUrl:
-    generalStats = json.loads(ctdUrl.read())
+# with urllib.request.urlopen(BASE_URL + GENERAL_STATS) as ctdUrl:
+#     generalStats = json.loads(ctdUrl.read())
 
-gs = []
-for key in generalStats.keys():
-    gs.append({'stat': key, 'value': generalStats[key], 'latitude': 40, 'longitude': 50})
+# gs = []
+# for key in generalStats.keys():
+#     gs.append({'stat': key, 'value': generalStats[key], 'latitude': 40, 'longitude': 50})
 
-df = pd.DataFrame(gs)
+# df = pd.DataFrame(gs)
 
-base = alt.Chart(df)\
-    .mark_rect()\
-    .encode(tooltip=['stat:N', 'value:Q'], latitude='latitude:Q', longitude='longitude:Q')
+# base = alt.Chart(df)\
+#     .mark_rect()\
+#     .encode(tooltip=['stat:N', 'value:Q'], latitude='latitude:Q', longitude='longitude:Q')
 
 ###
 # Area Plot con Dosis de los últimos 90 días
@@ -91,10 +91,10 @@ bubbleChart = alt.Chart(df)\
         color=alt.Color('condicion_aplicacion',
             type='nominal',
             title = 'Condición de Aplicación',
-            scale=alt.Scale(scheme='category20c')),
+            scale=alt.Scale(scheme='dark2')),
         size=alt.Size('total',
             type='quantitative',
-            scale=alt.Scale(type='log', range=[200, 2000]),
+            scale=alt.Scale(type='log', range=[200, 1000]),
             title='Dosis Aplicadas'),
         tooltip=[alt.Tooltip('condicion_aplicacion:N', title='Condición de Aplicación'),
             alt.Tooltip('total1dosis', title='Primera Dosis'),
