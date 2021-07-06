@@ -15,6 +15,10 @@ condicion_aplicacion text,
 orden_dosis integer,
 lote_vacuna text);
 
+create table updates (
+    updated timestamp
+);
+
 select * from nomivac limit 1;
 
 create index fecha_appl_index on nomivac(fecha_aplicacion);
@@ -156,3 +160,5 @@ where orden_dosis = 2;
 
 select count(*) as totalVacunados
 from nomivac;
+
+select * from updates order by updated desc limit 1;

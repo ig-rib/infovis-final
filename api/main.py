@@ -64,18 +64,22 @@ def totalDosesPerCompany(db: Session = Depends(get_db)):
 def general_stats(db: Session = Depends(get_db)):
     return queries.get_general_dose_stats(db)
 
+# Weird committing behaviour, TODO find bypass
 @app.on_event("startup")
 @repeat_every(seconds = 60 * 60 * 24)
 def updateDataBases() -> None:
     request.urlretrieve('https://sisa.msal.gov.ar/datos/descargas/covid-19/files/datos_nomivac_covid19.zip', 'files/datos_nomivac_covid19.zip')
+    print("extracting")
     with zipfile.ZipFile('files/datos_nomivac_covid19.zip') as zip_ref:
         zip_ref.extractall('files')
+    print("extracted!")
     with open('files/datos_nomivac_covid19.csv', 'r') as f, SessionLocal() as db:
         print("doing")
         deleteConn = engine.connect()
-        deleteConn.execute("delete from nomivac;")
-        print("deleted")
-        deleteConn.commit()
+        deleteConn.execute("delete from nomivac")
+        print("delet]ed")
+        # deleteConn.commit()
+        deleteConn.close()
         conn = engine.raw_connection()
         cursor = conn.cursor()
         print("creating")
@@ -95,7 +99,12 @@ def updateDataBases() -> None:
                 orden_dosis,\
                 lote_vacuna) FROM STDIN CSV DELIMITER ',' HEADER"
         cursor.copy_expert(cmd, f)
-        print("commiting")
-        conn.execute("insert into updates values(NOW()::timestamp);")
+        print("committing")
         conn.commit()
+        conn.close()
+        print("saving update")
+        conn = engine.connect()
+        conn.execute("insert into updates values(NOW()::timestamp)")
+        # conn.commit()
+        conn.close()
     print("done")
